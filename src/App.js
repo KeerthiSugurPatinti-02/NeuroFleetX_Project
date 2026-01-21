@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Home from './pages/home';
 import Login from './pages/Login';
@@ -18,65 +18,63 @@ import { ROLES } from './utils/authUtils';
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Public pages */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+    <Routes>
+      {/* Public pages */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Profile: any logged-in user can access */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+      {/* Profile: any logged-in user can access */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Dashboards per role */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+      {/* Dashboards per role */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/fleet-manager"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.FLEET_MANAGER]}>
-              <FleetManagerDashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/fleet-manager"
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.FLEET_MANAGER]}>
+            <FleetManagerDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/driver"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.DRIVER]}>
-              <DriverDashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/driver"
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.DRIVER]}>
+            <DriverDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/customer"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-              <CustomerDashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/customer"
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
+            <CustomerDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
