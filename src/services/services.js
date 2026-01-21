@@ -5,26 +5,34 @@ import { setUser, clearUser } from '../utils/authUtils';
 
 const REGISTERED_USER_KEY = 'nf_registered_user';
 export const authService = {
- async register({ gender, role, email, password }) {
+  async register({ gender, role, email, password }) {
+  const payload = { email, password, role, gender };
+
   const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      email,
-      password,
-      role
-    })
+    body: JSON.stringify(payload)
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error("Register error:", errText);
-    throw new Error("Registration failed");
+  let data;
+  const contentType = res.headers.get("content-type");
+
+  if (contentType && contentType.includes("application/json")) {
+    data = await res.json();   // Spring error object
+  } else {
+    data = await res.text();   // Plain text
   }
 
-  return res.json();
+  if (!res.ok) {
+    // Spring JSON errors have: status, error, message?, path
+    throw new Error(
+      data.message || data.error || data || "Registration failed"
+    );
+  }
+
+  return data;  // success message or object
 },
 
   async login({ email, password }) {
@@ -41,14 +49,10 @@ export const authService = {
     }
 
     const user = await res.json();
-    setUser(user);
-    return { user };
-  },
-
-  async logout() {
-    clearUser();
+    return user;
   }
 };
+
 
 
 // ========= PROFILE SERVICE =========

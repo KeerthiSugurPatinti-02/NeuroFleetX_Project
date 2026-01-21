@@ -32,20 +32,21 @@ const Login = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      const { user } = await authService.login(form);
-      navigate(redirectByRole(user.role), { replace: true });
-    } catch (err) {
-      setError(err.message || 'Login failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const user = await authService.login(form);  // 👈 FIX HERE
+    navigate(redirectByRole(user.role), { replace: true });
+  } catch (err) {
+    setError(err.message || 'Login failed.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="nf-auth-page">

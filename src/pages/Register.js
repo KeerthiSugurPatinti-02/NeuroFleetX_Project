@@ -10,12 +10,13 @@ import '../styles/auth.css';
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    gender: 'Female',
-    role: ROLES.CUSTOMER,
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  gender: 'FEMALE',
+  role: ROLES.CUSTOMER,
+  email: '',
+  password: '',
+  confirmPassword: '',
+});
+
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
 
@@ -24,49 +25,65 @@ const Register = () => {
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMsg('');
-    setErr('');
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setMsg('');
+  setErr('');
 
-    if (form.password !== form.confirmPassword) {
-      setErr('Passwords do not match.');
-      return;
-    }
+  if (form.password !== form.confirmPassword) {
+    setErr('Passwords do not match.');
+    return;
+  }
 
-    try {
-      await authService.register({
-        gender: form.gender,
-        role: form.role,
-        email: form.email,
-        password: form.password,
-      });
-      setMsg('Registration successful! Please login.');
-      setTimeout(() => navigate('/login'), 900);
-    } catch {
-      setErr('Registration failed. Try again.');
-    }
-  };
+  try {
+    const res = await authService.register({
+      gender: form.gender,
+      role: form.role,
+      email: form.email,
+      password: form.password,
+    });
 
+    setErr("");        // clear error
+    setMsg(res);       // "Registration successful"
+    setTimeout(() => navigate('/login'), 900);
+
+  } catch (error) {
+    setMsg("");        // clear success
+    setErr(error.message); // show only backend message
+  }
+};
   return (
     <div className="nf-auth-page">
       <div className="nf-auth-card">
         <h1 className="nf-auth-title">Register</h1>
         <p className="nf-auth-subtitle">
-          Create your NeuroFleetX account with role-based access.
-        </p>
+  Create your NeuroFleetX account with role-based access.
+</p>
 
-        {err && <div className="nf-alert nf-alert-error">{err}</div>}
-        {msg && <div className="nf-alert nf-alert-success">{msg}</div>}
+{err && (
+  <div
+    className={`nf-alert ${
+      err.toLowerCase().includes("email already")
+        ? "nf-alert-info"
+        : "nf-alert-error"
+    }`}
+  >
+    {err}
+  </div>
+)}
+
+{msg && <div className="nf-alert nf-alert-success">{msg}</div>}
+
+
 
         <form onSubmit={handleSubmit} className="nf-auth-form">
           {/* Gender */}
           <div className="nf-form-group">
             <label>Gender</label>
             <select name="gender" value={form.gender} onChange={handleChange}>
-              <option value="Female">Female</option>
-              <option value="Male">Male</option>
-              <option value="Other">Other</option>
+              <option value="FEMALE">Female</option>
+              <option value="MALE">Male</option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
 

@@ -1218,3 +1218,8 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+.nf-alert-info {
+  background-color: #e7f3ff !important;
+  color: #0d6efd !important;
+  border: 1px solid #b6d4fe !important;
+}
