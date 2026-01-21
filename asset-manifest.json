@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "/NeuroFleetX_Project/static/css/main.bdf72a06.css",
-    "main.js": "/NeuroFleetX_Project/static/js/main.dbe5d2bb.js",
+    "main.js": "/NeuroFleetX_Project/static/js/main.d0dd00ce.js",
     "static/js/239.81d061a5.chunk.js": "/NeuroFleetX_Project/static/js/239.81d061a5.chunk.js",
     "static/js/977.f7da2f9d.chunk.js": "/NeuroFleetX_Project/static/js/977.f7da2f9d.chunk.js",
     "static/js/455.4cff9e04.chunk.js": "/NeuroFleetX_Project/static/js/455.4cff9e04.chunk.js",
     "static/media/img6.png": "/NeuroFleetX_Project/static/media/img6.9300d1fcce907efdfdc7.png",
     "index.html": "/NeuroFleetX_Project/index.html",
     "main.bdf72a06.css.map": "/NeuroFleetX_Project/static/css/main.bdf72a06.css.map",
-    "main.dbe5d2bb.js.map": "/NeuroFleetX_Project/static/js/main.dbe5d2bb.js.map",
+    "main.d0dd00ce.js.map": "/NeuroFleetX_Project/static/js/main.d0dd00ce.js.map",
     "239.81d061a5.chunk.js.map": "/NeuroFleetX_Project/static/js/239.81d061a5.chunk.js.map",
     "977.f7da2f9d.chunk.js.map": "/NeuroFleetX_Project/static/js/977.f7da2f9d.chunk.js.map",
     "455.4cff9e04.chunk.js.map": "/NeuroFleetX_Project/static/js/455.4cff9e04.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.bdf72a06.css",
-    "static/js/main.dbe5d2bb.js"
+    "static/js/main.d0dd00ce.js"
   ]
 }
