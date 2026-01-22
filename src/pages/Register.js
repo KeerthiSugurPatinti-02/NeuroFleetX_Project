@@ -1,11 +1,10 @@
 // src/pages/Register.js
-import { API_BASE_URL } from "../config";
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/services';
 import { ROLES } from '../utils/authUtils';
 import '../styles/auth.css';
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -41,17 +40,25 @@ const Register = () => {
       role: form.role,
       email: form.email,
       password: form.password,
+      confirmPassword: form.confirmPassword
     });
 
-    setErr("");        // clear error
-    setMsg(res);       // "Registration successful"
+    setErr("");
+    setMsg(res);
     setTimeout(() => navigate('/login'), 900);
 
-  } catch (error) {
-    setMsg("");        // clear success
-    setErr(error.message); // show only backend message
+ } catch (error) {
+  setMsg("");
+
+  if (error.response && error.response.data) {
+    setErr(error.response.data);   // backend message
+  } else {
+    setErr("Email Already Exists.");
   }
 };
+ };
+
+
   return (
     <div className="nf-auth-page">
       <div className="nf-auth-card">

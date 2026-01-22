@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/services';
-import { ROLES } from '../utils/authUtils';
+import { ROLES, setUser } from '../utils/authUtils';   // 🔥 import setUser
 import '../styles/auth.css';
 
 const Login = () => {
@@ -27,26 +27,35 @@ const Login = () => {
         return '/fleet-manager';
       case ROLES.DRIVER:
         return '/driver';
+      case ROLES.CUSTOMER:
+        return '/customer';
       default:
         return '/customer';
     }
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  try {
-    const user = await authService.login(form);  // 👈 FIX HERE
-    navigate(redirectByRole(user.role), { replace: true });
-  } catch (err) {
-    setError(err.message || 'Login failed.');
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const user = await authService.login(form);
 
+      console.log("LOGIN RESPONSE:", user); // 🔍 debug
+
+      // 🔥 SAVE USER IN LOCAL STORAGE
+      setUser(user);
+
+      // 🔥 REDIRECT BASED ON ROLE
+      navigate(redirectByRole(user.role), { replace: true });
+
+    } catch (err) {
+      setError(err.message || 'Login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="nf-auth-page">

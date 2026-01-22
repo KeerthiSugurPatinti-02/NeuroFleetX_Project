@@ -18,26 +18,28 @@ public class UserService {
     }
 
     // ================= REGISTER =================
-    public User register(User user) {
+  public User register(User user) {
 
-        // Check if email already exists
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Email already registered"
-            );
-        }
-
-        // Default role if not provided
-        if (user.getRole() == null || user.getRole().isBlank()) {
-            user.setRole("CUSTOMER");
-        }
-
-        // Plain password for now (OK for project stage)
-        user.setPassword(user.getPassword());
-
-        return userRepository.save(user);
+    if (user.getEmail() == null || user.getEmail().isBlank()) {
+        throw new IllegalArgumentException("Email is required");
     }
+
+    if (userRepository.existsByEmail(user.getEmail())) {
+        throw new IllegalArgumentException("Email already exists");
+    }
+
+    if (user.getPassword() == null || user.getPassword().isBlank()) {
+        throw new IllegalArgumentException("Password is required");
+    }
+
+    // Default role if not provided
+    if (user.getRole() == null || user.getRole().isBlank()) {
+        user.setRole("CUSTOMER");
+    }
+
+    return userRepository.save(user);
+}
+
 
     // ================= LOGIN =================
     public User login(String email, String password) {

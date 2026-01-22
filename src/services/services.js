@@ -1,7 +1,7 @@
 // src/services/services.js
 import { API_BASE_URL } from "../config";
 
-import { setUser, clearUser } from '../utils/authUtils';
+import { setUser } from '../utils/authUtils';
 
 const REGISTERED_USER_KEY = 'nf_registered_user';
 export const authService = {

@@ -23,40 +23,37 @@ const LeafletRoute = ({ waypoints, color, opacity = 1, onFound }) => {
   const ref = useRef(null);
 
   useEffect(() => {
-    if (!map || !waypoints || waypoints.length < 2) return;
+  if (!map || !waypoints || waypoints.length < 2) return;
 
-    const control = L.Routing.control({
-      waypoints: waypoints.map(p => L.latLng(p[0], p[1])),
-      addWaypoints: false,
-      draggableWaypoints: false,
-      show: false,
-      createMarker: () => null,
-      lineOptions: {
-        styles: [{ color, weight: 5, opacity }],
-      },
+  const control = L.Routing.control({
+    waypoints: waypoints.map(p => L.latLng(p[0], p[1])),
+    addWaypoints: false,
+    draggableWaypoints: false,
+    show: false,
+    createMarker: () => null,
+    lineOptions: {
+      styles: [{ color, weight: 5, opacity }],
+    },
+    router: L.Routing.osrmv1({
+      serviceUrl: "https://router.project-osrm.org/route/v1",
+    }),
+  }).on("routesfound", e => {
+    const r = e.routes[0];
+    onFound(
+      r.summary.totalDistance / 1000,
+      r.summary.totalTime / 60
+    );
+  });
 
-      router: L.Routing.osrmv1({
-        serviceUrl: "https://router.project-osrm.org/route/v1",
-      }),
-    }).on("routesfound", e => {
-      const r = e.routes[0];
-      onFound(
-        r.summary.totalDistance / 1000,
-        r.summary.totalTime / 60
-      );
-    });
+  control.addTo(map);
+  ref.current = control;
 
-    control.addTo(map);
-    ref.current = control;
-
-    return () => {
-      try {
-        map.removeControl(control);
-      } catch { }
-    };
-  }, [map, waypoints, color]);
-
-  return null;
+  return () => {
+    try {
+      map.removeControl(control);
+    } catch {}
+  };
+}, [map, waypoints, color, opacity, onFound]);
 };
 
 /* ================= MAIN ================= */

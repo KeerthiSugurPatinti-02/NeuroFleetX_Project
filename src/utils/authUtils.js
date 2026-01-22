@@ -7,7 +7,7 @@ export const ROLES = {
   CUSTOMER: 'CUSTOMER',
 };
 
-const USER_KEY = 'nf_demo_user';
+const USER_KEY = 'nf_user';
 
 export function setUser(user) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));

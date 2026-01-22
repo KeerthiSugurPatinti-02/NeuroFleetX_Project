@@ -174,11 +174,16 @@ const trafficStyle = {
 /* ===== AUTO ZOOM ===== */
 const FollowVehicle = ({ pos }) => {
   const map = useMap();
+
   useEffect(() => {
-    if (pos) map.flyTo(pos, 7, { duration: 1.2 });
-  }, [pos]);
+    if (pos && map) {
+      map.flyTo(pos, 7, { duration: 1.2 });
+    }
+  }, [pos, map]);   // 👈 add map here
+
   return null;
 };
+
 
 const LiveTracking = () => {
   const [vehicles, setVehicles] = useState(initialVehicles);
