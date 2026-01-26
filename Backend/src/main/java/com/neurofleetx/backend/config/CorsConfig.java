@@ -16,7 +16,8 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:3000",
-                                "https://keerthisugurapatinti-02.github.io"
+                                "https://keerthisugurapatinti-02.github.io",
+                                "https://neuro-fleet-x-project.vercel.app"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
