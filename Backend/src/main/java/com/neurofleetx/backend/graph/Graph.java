@@ -15,8 +15,13 @@ public class Graph {
         adjacency.putIfAbsent(node, new HashMap<>());
     }
 
+    // 🔥 Bidirectional edge (real roads work both ways)
     public void addEdge(Node from, Node to, int weight) {
+        addNode(from);
+        addNode(to);
+
         adjacency.get(from).put(to, weight);
+        adjacency.get(to).put(from, weight);   // reverse direction
     }
 
     public Set<Node> getNodes() {

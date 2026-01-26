@@ -1,63 +1,34 @@
-import React, { useState, useRef, useEffect } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+// src/pages/RoutePlanner.js
+import React, { useState, useRef } from "react";
+import { MapContainer, TileLayer, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
-/* ===== LEAFLET ICON FIX ===== */
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+/* ================= DISTANCE HELPERS ================= */
+function getDistance(p1, p2) {
+  const R = 6371;
+  const dLat = ((p2[0] - p1[0]) * Math.PI) / 180;
+  const dLng = ((p2[1] - p1[1]) * Math.PI) / 180;
 
-/* ===== ROUTE DRAWER ===== */
-const LeafletRoute = ({ waypoints, color, opacity = 1, onFound }) => {
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((p1[0] * Math.PI) / 180) *
+      Math.cos((p2[0] * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
 
-  const map = useMap();
-  const ref = useRef(null);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
-  useEffect(() => {
-  if (!map || !waypoints || waypoints.length < 2) return;
+function calculateTotalDistance(coords) {
+  let total = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    total += getDistance(coords[i], coords[i + 1]);
+  }
+  return total;
+}
 
-  const control = L.Routing.control({
-    waypoints: waypoints.map(p => L.latLng(p[0], p[1])),
-    addWaypoints: false,
-    draggableWaypoints: false,
-    show: false,
-    createMarker: () => null,
-    lineOptions: {
-      styles: [{ color, weight: 5, opacity }],
-    },
-    router: L.Routing.osrmv1({
-      serviceUrl: "https://router.project-osrm.org/route/v1",
-    }),
-  }).on("routesfound", e => {
-    const r = e.routes[0];
-    onFound(
-      r.summary.totalDistance / 1000,
-      r.summary.totalTime / 60
-    );
-  });
-
-  control.addTo(map);
-  ref.current = control;
-
-  return () => {
-    try {
-      map.removeControl(control);
-    } catch {}
-  };
-}, [map, waypoints, color, opacity, onFound]);
-};
-
-/* ================= MAIN ================= */
-
+/* ================= MAIN COMPONENT ================= */
 const RoutePlanner = () => {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
@@ -66,15 +37,17 @@ const RoutePlanner = () => {
   const [stopInput, setStopInput] = useState("");
   const [stops, setStops] = useState([]);
 
+  const [coords, setCoords] = useState([]);
   const [routes, setRoutes] = useState(null);
-  const [routeInfo, setRouteInfo] = useState({});
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [finalRoute, setFinalRoute] = useState(null);
-
   const [message, setMessage] = useState("");
 
+  const [routeIndex, setRouteIndex] = useState(0);
+  const animationRef = useRef(null);
+
   /* ===== GEOCODING ===== */
-  const getCoords = async (place) => {
+  const getCoordsFromCity = async (place) => {
     const r = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${place}`
     );
@@ -83,7 +56,6 @@ const RoutePlanner = () => {
     return [parseFloat(d[0].lat), parseFloat(d[0].lon)];
   };
 
-  /* ===== ADD STOP ===== */
   const addStop = () => {
     if (stopInput.trim()) {
       setStops([...stops, stopInput.trim()]);
@@ -93,60 +65,103 @@ const RoutePlanner = () => {
 
   /* ===== GENERATE ROUTES ===== */
   const generateRoutes = async () => {
+    setFinalRoute(null);
+    setSelectedRoute(null);
     setMessage("");
-    const src = await getCoords(source);
-    const dst = await getCoords(destination);
-    if (!src || !dst) return;
+
+    const src = await getCoordsFromCity(source);
+    const dst = await getCoordsFromCity(destination);
+
+    if (!src || !dst) {
+      alert("Invalid source or destination");
+      return;
+    }
 
     const stopCoords = [];
     for (let s of stops) {
-      const c = await getCoords(s);
+      const c = await getCoordsFromCity(s);
       if (c) stopCoords.push(c);
     }
 
     const path = [src, ...stopCoords, dst];
+    setCoords(path);
 
-    setRoutes({
-      shortest: { path, color: "#2563eb" },
-      traffic: { path, color: "#f97316" },
-      eco: { path, color: "#22c55e" },
-    });
+    const baseDistance = calculateTotalDistance(path);
 
-    setRouteInfo({});
-    setSelectedRoute(null);
-    setFinalRoute(null);
+    const ratePerKm =
+      vehicle === "Truck" ? 12 : vehicle === "Bike" ? 5 : 8;
+
+    const allRoutes = [
+      {
+        name: "shortest",
+        color: "#2563eb",
+        distance: baseDistance,
+        cost: baseDistance * ratePerKm,
+      },
+      {
+        name: "traffic",
+        color: "#f97316",
+        distance: baseDistance * 1.1,
+        cost: baseDistance * 1.2 * ratePerKm,
+      },
+      {
+        name: "eco",
+        color: "#22c55e",
+        distance: baseDistance * 1.15,
+        cost: baseDistance * 0.9 * ratePerKm,
+      },
+    ];
+
+    setRoutes(allRoutes);
+
+    // clear old animation
+    if (animationRef.current) {
+      clearInterval(animationRef.current);
+    }
+
+    // start blinking animation
+    animationRef.current = setInterval(() => {
+      setRouteIndex((prev) => (prev + 1) % allRoutes.length);
+    }, 800);
   };
-
-  /* ===== COST LOGIC ===== */
-  const ratePerKm =
-    vehicle === "Truck" ? 12 :
-      vehicle === "Bike" ? 5 : 8;
 
   /* ===== PLAN TRIP ===== */
   const planTrip = () => {
-    if (!selectedRoute) return;
-    setFinalRoute(routes[selectedRoute]);
-    setMessage("✅ Trip planned and assigned to driver Ravi Kumar");
+    if (selectedRoute === null) {
+      alert("Please select a route!");
+      return;
+    }
+
+    setFinalRoute(selectedRoute);
+    clearInterval(animationRef.current);
+    setMessage("🚚 Trip Assigned to Driver: Ravi Kumar");
   };
 
   return (
-    <div style={styles.page}>
-      {/* ===== SIDEBAR ===== */}
+    <div style={styles.container}>
+      {/* ================= SIDEBAR ================= */}
       <div style={styles.sidebar}>
         <h2 style={styles.title}>Route Planner</h2>
 
         <label style={styles.label}>Source</label>
-
-        <input style={styles.input} placeholder="Enter source" onChange={e => setSource(e.target.value)} />
+        <input
+          style={styles.input}
+          placeholder="Enter source city"
+          onChange={(e) => setSource(e.target.value)}
+        />
 
         <label style={styles.label}>Destination</label>
-        <input style={styles.input} placeholder="Enter destination" onChange={e => setDestination(e.target.value)} />
+        <input
+          style={styles.input}
+          placeholder="Enter destination city"
+          onChange={(e) => setDestination(e.target.value)}
+        />
 
         <label style={styles.label}>Stop (Optional)</label>
         <input
           style={styles.input}
           value={stopInput}
-          onChange={e => setStopInput(e.target.value)}
+          onChange={(e) => setStopInput(e.target.value)}
         />
         <button style={styles.secondaryBtn} onClick={addStop}>
           Add Stop
@@ -157,7 +172,10 @@ const RoutePlanner = () => {
         ))}
 
         <label style={styles.label}>Vehicle</label>
-        <select style={styles.input} onChange={e => setVehicle(e.target.value)}>
+        <select
+          style={styles.input}
+          onChange={(e) => setVehicle(e.target.value)}
+        >
           <option>Car</option>
           <option>Bike</option>
           <option>Truck</option>
@@ -167,34 +185,36 @@ const RoutePlanner = () => {
           Generate Routes
         </button>
 
-        {/* ===== ETA CARDS ===== */}
+        {/* ================= ROUTE CARDS ================= */}
         {routes && (
-          <div style={{ marginTop: 14 }}>
-            {Object.keys(routes).map(k => {
-              const info = routeInfo[k];
-              const distance = info?.distance || 0;
-              const time = Math.round(info?.time || 0);
-              const cost = Math.round(distance * ratePerKm);
+          <div style={styles.cards}>
+            {routes.map((r, index) => (
+              <div
+                key={index}
+                style={{
+                  ...styles.card,
+                  border:
+                    selectedRoute === index
+                      ? "2px solid #2563eb"
+                      : "1px solid #d1d5db",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="route"
+                  onChange={() => setSelectedRoute(index)}
+                />
 
-              return (
-                <div key={k} style={styles.etaCard}>
-                  <input
-                    type="radio"
-                    name="route"
-                    checked={selectedRoute === k}
-                    onChange={() => setSelectedRoute(k)}
-                  />{" "}
-                  <span style={{ fontWeight: 700 }}>
-                    {k === "shortest" && "🔵 Shortest"}
-                    {k === "traffic" && "🟠 Traffic Aware"}
-                    {k === "eco" && "🟢 Eco Friendly"}
-                  </span>
-                  <div>Distance: {distance.toFixed(1)} km</div>
-                  <div>Time: {time} mins</div>
-                  <div>Cost: ₹{cost}</div>
-                </div>
-              );
-            })}
+                <h4 style={styles.cardTitle}>
+                  {r.name === "shortest" && "🔵 Shortest Route"}
+                  {r.name === "traffic" && "🟠 Traffic Aware Route"}
+                  {r.name === "eco" && "🟢 Eco Friendly Route"}
+                </h4>
+
+                <p>Distance: {r.distance.toFixed(2)} km</p>
+                <p>Cost: ₹{Math.round(r.cost)}</p>
+              </div>
+            ))}
 
             <button style={styles.planBtn} onClick={planTrip}>
               Plan Trip
@@ -205,35 +225,38 @@ const RoutePlanner = () => {
         {message && <div style={styles.success}>{message}</div>}
       </div>
 
-      {/* ===== MAP ===== */}
+      {/* ================= MAP ================= */}
       <div style={styles.mapBox}>
-        <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: "100%" }}>
+        <MapContainer
+          center={[20.5937, 78.9629]}
+          zoom={5}
+          style={{ height: "100%", width: "100%" }}
+        >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+          {/* Show all 3 routes blinking */}
           {routes && !finalRoute &&
-            Object.entries(routes).map(([k, r]) => (
-              <LeafletRoute
-                key={k}
-                waypoints={r.path}
-                color={r.color}
-                opacity={
-                  !selectedRoute || selectedRoute === k ? 1 : 0.25
-                }
-                onFound={(d, t) =>
-                  setRouteInfo(prev => ({
-                    ...prev,
-                    [k]: { distance: d, time: t },
-                  }))
-                }
+            routes.map((r, i) => (
+              <Polyline
+                key={i}
+                positions={coords}
+                pathOptions={{
+                  color: r.color,
+                  weight: 4,
+                  opacity: routeIndex === i ? 1 : 0.3,
+                }}
               />
             ))}
 
-
-          {finalRoute && (
-            <LeafletRoute
-              waypoints={finalRoute.path}
-              color={finalRoute.color}
-              onFound={() => { }}
+          {/* Show only selected route after planning */}
+          {finalRoute !== null && (
+            <Polyline
+              positions={coords}
+              pathOptions={{
+                color: routes[finalRoute].color,
+                weight: 6,
+                opacity: 1,
+              }}
             />
           )}
         </MapContainer>
@@ -244,139 +267,104 @@ const RoutePlanner = () => {
 
 export default RoutePlanner;
 
-/* ===== STYLES ===== */
+/* ================= STYLES ================= */
 const styles = {
-  page: {
+  container: {
     display: "grid",
     gridTemplateColumns: "380px 1fr",
     height: "100vh",
-    background: "#f1f5f9",
+    background: "#f3f4f6",
     fontFamily: "Segoe UI, sans-serif",
+    color: "#111827",
   },
 
-  /* ===== SIDEBAR ===== */
   sidebar: {
-    padding: 24,
+    padding: 20,
     background: "#ffffff",
-    borderRight: "1px solid #e5e7eb",
+    borderRight: "2px solid #e5e7eb",
     overflowY: "auto",
   },
 
   title: {
     fontSize: 22,
     fontWeight: 700,
-    color: "#1e3a8a",
-    marginBottom: 16,
+    marginBottom: 15,
   },
 
   label: {
-    fontSize: 14,
     fontWeight: 600,
-    color: "#0f172a", // dark slate (NOT grey)
-    marginBottom: 6,
-    display: "block",
+    marginTop: 10,
   },
-
 
   input: {
     width: "100%",
-    padding: 12,
-    marginBottom: 12,
-    borderRadius: 10,
-    border: "1px solid #cbd5e1",
-    fontSize: 14,
-    color: "#0f172a",                            // typed text
-    backgroundColor: "#ffffff",       // IMPORTANT
-    WebkitTextFillColor: "#0f172a",  // 🔥 MOST IMPORTANT
-    outline: "none",
+    padding: 10,
+    borderRadius: 8,
+    border: "1px solid #9ca3af",
+    marginBottom: 6,
   },
-
 
   primaryBtn: {
     width: "100%",
-    padding: 14,
+    padding: 12,
     background: "#2563eb",
-    color: "#ffffff",
+    color: "#fff",
     border: "none",
-    borderRadius: 12,
+    borderRadius: 10,
     fontWeight: 600,
-    cursor: "pointer",
-    marginTop: 8,
+    marginTop: 10,
   },
 
   secondaryBtn: {
     width: "100%",
-    padding: 12,
+    padding: 10,
     background: "#e0e7ff",
-    color: "#1e3a8a",
     border: "none",
-    borderRadius: 12,
+    borderRadius: 10,
     fontWeight: 600,
-    cursor: "pointer",
-    marginBottom: 8,
   },
 
   stop: {
     fontSize: 13,
-    color: "#1e293b",
-    marginBottom: 4,
+    marginTop: 4,
   },
 
-  /* ===== ETA CARDS ===== */
-  etaCard: {
-    background: "#ffffff",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
-    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-    cursor: "pointer",
-    border: "2px solid transparent",
-    color: "#0f172a",
+  cards: {
+    marginTop: 15,
   },
 
-  etaSelected: {
-    border: "2px solid #2563eb",
-    background: "#eff6ff",
+  card: {
+    background: "#f9fafb",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
   },
 
-  etaTitle: {
-    fontWeight: 700,
-    fontSize: 14,
-    marginBottom: 6,
-  },
-
-  etaRow: {
-    fontSize: 13,
-    color: "#0f131aff",
-    marginBottom: 2,
+  cardTitle: {
+    margin: "6px 0",
   },
 
   planBtn: {
     width: "100%",
-    marginTop: 10,
-    padding: 14,
+    padding: 12,
     background: "#16a34a",
-    color: "#261d1dff",
+    color: "#fff",
     border: "none",
-    borderRadius: 14,
-    fontWeight: 600,
-    cursor: "pointer",
+    borderRadius: 12,
+    fontWeight: 700,
   },
 
   success: {
     marginTop: 14,
     padding: 12,
     background: "#dcfce7",
-    color: "#166534",
+    color: "#065f46",
     borderRadius: 10,
     fontWeight: 600,
   },
 
-  /* ===== MAP ===== */
   mapBox: {
-    margin: 16,
-    borderRadius: 16,
-    overflow: "hidden",
-    boxShadow: "0 18px 40px rgba(0,0,0,0.15)",
+    height: "100%",
+    background: "#e5e7eb",
   },
 };
