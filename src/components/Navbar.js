@@ -29,9 +29,7 @@ const Navbar = ({ onProfileClick }) => {
     <nav className="nf-navbar">
       <div className="nf-navbar-left">
         <span className="nf-logo">NeuroFleetX</span>
-        <span className="nf-navbar-subtitle">
-          AI-Powered Urban Fleet & Traffic
-        </span>
+        <span className="nf-navbar-subtitle">AI fleet operations</span>
       </div>
 
       <div className="nf-navbar-right">
@@ -41,21 +39,22 @@ const Navbar = ({ onProfileClick }) => {
 
         {user && (
           <>
-            {/* ✅ PROFILE OPENS INSIDE DASHBOARD */}
+            {/* Profile opens inside the dashboard */}
             <button
               type="button"
               className="nf-profile-circle"
               title="Profile"
+              aria-label="Open profile"
               onClick={() => onProfileClick && onProfileClick()}
             >
               {getInitial()}
             </button>
 
             <span className="nf-user-info">
-              {user.email} ({user.role})
+              {user.name || user.email} - {user.role}
             </span>
 
-            <button className="nf-btn-outline" onClick={handleLogout}>
+            <button type="button" className="nf-btn-outline" onClick={handleLogout}>
               Logout
             </button>
           </>

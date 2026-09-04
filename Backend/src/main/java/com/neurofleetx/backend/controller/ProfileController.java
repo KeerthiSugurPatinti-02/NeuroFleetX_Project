@@ -1,6 +1,11 @@
 package com.neurofleetx.backend.controller;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.neurofleetx.backend.dto.ProfileUpdateRequest;
 import com.neurofleetx.backend.model.User;
@@ -8,7 +13,6 @@ import com.neurofleetx.backend.service.UserService;
 
 @RestController
 @RequestMapping("/api/profile")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ProfileController {
 
     private final UserService service;

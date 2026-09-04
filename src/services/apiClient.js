@@ -1,9 +1,10 @@
 // src/services/apiClient.js
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import { getToken, isTokenExpired, clearAuth } from '../utils/authUtils';
 
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
+  baseURL: API_BASE_URL,
 });
 
 apiClient.interceptors.request.use(

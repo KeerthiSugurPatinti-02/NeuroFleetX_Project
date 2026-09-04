@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/services';
-import { ROLES, setUser } from '../utils/authUtils';   // 🔥 import setUser
+import { ROLES, setUser } from '../utils/authUtils';
 import '../styles/auth.css';
 
 const Login = () => {
@@ -16,7 +16,7 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const redirectByRole = (role) => {
@@ -41,15 +41,8 @@ const Login = () => {
 
     try {
       const user = await authService.login(form);
-
-      console.log("LOGIN RESPONSE:", user); // 🔍 debug
-
-      // 🔥 SAVE USER IN LOCAL STORAGE
       setUser(user);
-
-      // 🔥 REDIRECT BASED ON ROLE
       navigate(redirectByRole(user.role), { replace: true });
-
     } catch (err) {
       setError(err.message || 'Login failed.');
     } finally {
@@ -62,7 +55,7 @@ const Login = () => {
       <div className="nf-auth-card">
         <h1 className="nf-auth-title">Login</h1>
         <p className="nf-auth-subtitle">
-          Enter your email and password to access NeuroFleetX.
+          Sign in to access your role-based dashboard.
         </p>
 
         {error && <div className="nf-alert nf-alert-error">{error}</div>}
@@ -93,7 +86,7 @@ const Login = () => {
           </div>
 
           <button className="nf-btn-primary" type="submit" disabled={loading}>
-            {loading ? <span className="nf-spinner" /> : 'Login'}
+            {loading ? <span className="nf-spinner" /> : 'Sign In'}
           </button>
         </form>
 

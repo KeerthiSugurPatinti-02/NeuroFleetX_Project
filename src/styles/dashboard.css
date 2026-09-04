@@ -199,3 +199,65 @@
   flex: 1;
 }
 
+/* ===== POLISHED UI OVERRIDES ===== */
+.nf-navbar {
+  padding: 14px 22px;
+  background: linear-gradient(90deg, rgba(8, 15, 30, 0.94), rgba(29, 78, 216, 0.92));
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.34);
+}
+
+.nf-navbar-subtitle {
+  font-size: 0.82rem;
+  opacity: 0.78;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nf-user-info {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.nf-dashboard-layout {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 30%),
+    linear-gradient(180deg, #eef4fb 0%, #edf2f7 100%);
+  color: #0f172a;
+}
+
+.nf-dashboard-main {
+  padding: 20px 20px 34px;
+}
+
+.nf-dashboard-header p {
+  font-size: 0.98rem;
+  color: #475569;
+}
+
+.nf-metric-card {
+  background: rgba(8, 15, 30, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.24);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.16);
+}
+
+.nf-metric-card h3 {
+  color: #bfd3ff;
+}
+
+.nf-metric-card p {
+  color: #f8fafc;
+}
+
+.nf-metric-card:hover {
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.24);
+}
+
+.nf-profile-circle {
+  background: rgba(148, 163, 184, 0.28);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+}
+
+.nf-profile-circle:hover {
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+}
+

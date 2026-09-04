@@ -1,134 +1,172 @@
 // src/pages/Home.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import heroImage from '../asserts/img6.png';
+import logoImage from '../asserts/logo.png';
 import '../styles/auth.css';
 
 const Home = () => {
-  const year = new Date().getFullYear();
-
   return (
     <div className="nf-site-wrapper">
-      {/* HEADER */}
       <header className="nf-site-header">
         <div className="nf-site-logo">
-          <div className="nf-logo-icon">N</div>
+          <img src={logoImage} alt="NeuroFleetX logo" className="nf-logo-img" />
           <div className="nf-logo-text">
             <span className="nf-logo-main">NeuroFleetX</span>
-            <span className="nf-logo-sub">AI Fleet & Traffic</span>
+            <span className="nf-logo-sub">Smart fleet operations</span>
           </div>
         </div>
 
         <nav className="nf-site-nav">
-          <a href="#home">Home</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+          <a href="#home" className="nf-site-nav-link active">
+            Home
+          </a>
+          <a href="#capabilities" className="nf-site-nav-link">
+            Capabilities
+          </a>
+          <a href="#why" className="nf-site-nav-link">
+            Why us
+          </a>
+          <a href="#contact" className="nf-site-nav-link">
+            Contact
+          </a>
         </nav>
 
         <div className="nf-site-actions">
-          <Link to="/login" className="nf-btn-primary nf-login-btn">
+          <Link to="/login" className="nf-btn-outline nf-login-btn">
             Login
+          </Link>
+          <Link to="/register" className="nf-btn-primary nf-login-btn">
+            Register
           </Link>
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <main>
-        {/* HERO / HOME SECTION */}
-        <section id="home" className="nf-home-page">
-          <div className="nf-home-hero">
-            <div className="nf-home-text">
-              <h1>NeuroFleetX</h1>
-              <p>
-                An AI-powered urban fleet and traffic management platform that
-                optimizes city mobility, reduces congestion and enhances road
-                safety using intelligent analytics.
+        <section id="home" className="nf-hero-section">
+          <div className="nf-hero-panel">
+            <div className="nf-hero-copy">
+              <p className="nf-kicker">Logistics intelligence</p>
+              <h1>Optimise every route, vehicle, and delivery.</h1>
+              <p className="nf-hero-description">
+                NeuroFleetX gives logistics teams live fleet visibility, predictive routing, and simple driver performance tracking in one modern dashboard.
               </p>
-              <div className="nf-home-actions">
-                <Link to="/login" className="nf-btn-primary">
-                  Get Started
+
+              <div className="nf-hero-actions">
+                <Link to="/register" className="nf-btn-primary nf-hero-btn">
+                  Get started
                 </Link>
-                <Link to="/register" className="nf-btn-outline">
-                  Register
+                <Link to="/login" className="nf-btn-outline nf-hero-btn">
+                  See demo
                 </Link>
               </div>
-              <div className="nf-home-badges">
-                <span>Real-time traffic insights</span>
-                <span>Smart route optimization</span>
-                <span>Role-based dashboards</span>
+
+              <div className="nf-hero-highlights">
+                <div className="nf-highlight-pill">
+                  <strong>99.8%</strong>
+                  <span>fleet availability</span>
+                </div>
+                <div className="nf-highlight-pill">
+                  <strong>15%</strong>
+                  <span>route cost savings</span>
+                </div>
+                <div className="nf-highlight-pill">
+                  <strong>24/7</strong>
+                  <span>live tracking</span>
+                </div>
               </div>
             </div>
 
-            <div className="nf-home-panel">
-              <div className="nf-home-card">
-                <h3>Live Fleet Snapshot</h3>
-                <ul>
-                  <li> 32 Vehicles active</li>
-                  <li> 9 Trips in progress</li>
-                  <li> Avg. delay: 3.2 mins</li>
-                  <li> CO₂ saved today: 184 kg</li>
-                </ul>
-              </div>
-              <div className="nf-home-card small">
-                <h4>Traffic Hotspots</h4>
-                <p>Central Business District · IT Corridor · City Ring Road</p>
-              </div>
+            <div className="nf-hero-visual">
+              <img src={heroImage} alt="Fleet analytics dashboard" />
             </div>
           </div>
         </section>
 
-        {/* ABOUT SECTION */}
-        <section id="about" className="nf-about-section">
-          <div className="nf-about-card">
-            <h2>About NeuroFleetX</h2>
-            <p>
-              NeuroFleetX is designed as a smart city solution for managing
-              fleets, drivers and customer trips in real time. It brings
-              together advanced AI models, live traffic data and intuitive
-              dashboards for different roles in the ecosystem.
-            </p>
-            <div className="nf-about-grid">
-              <div className="nf-about-item">
-                <h3>Admins</h3>
-                <p>Monitor overall system usage, revenue and platform health.</p>
-              </div>
-              <div className="nf-about-item">
-                <h3>Fleet Managers</h3>
-                <p>
-                  Track vehicles, drivers, active trips and optimize route
-                  assignments.
-                </p>
-              </div>
-              <div className="nf-about-item">
-                <h3>Drivers</h3>
-                <p>
-                  View daily trips, earnings, performance and smart route
-                  suggestions.
-                </p>
-              </div>
-              <div className="nf-about-item">
-                <h3>Customers</h3>
-                <p>
-                  Manage bookings, view trip history, spend and travel
-                  preferences.
-                </p>
-              </div>
+        <section id="capabilities" className="nf-features-section">
+          <div className="nf-section-intro">
+            <p className="nf-kicker">Capabilities</p>
+            <h2>Control your fleet from planning to delivery.</h2>
+          </div>
+
+          <div className="nf-features-grid">
+            <div className="nf-feature-card">
+              <div className="nf-feature-icon">📍</div>
+              <h3>Vehicle Tracking</h3>
+              <p>Monitor every vehicle in real time with live location and status updates.</p>
+            </div>
+            <div className="nf-feature-card">
+              <div className="nf-feature-icon">🧭</div>
+              <h3>Route Optimization</h3>
+              <p>Reduce idle time and fuel usage using smarter routing for every dispatch.</p>
+            </div>
+            <div className="nf-feature-card">
+              <div className="nf-feature-icon">📊</div>
+              <h3>Dashboard Insights</h3>
+              <p>Visualise fleet performance with intuitive charts and KPI summaries.</p>
+            </div>
+            <div className="nf-feature-card">
+              <div className="nf-feature-icon">🔒</div>
+              <h3>Secure Access</h3>
+              <p>Role-based login ensures drivers, managers and customers see only what they need.</p>
             </div>
           </div>
         </section>
 
-        {/* CONTACT SECTION */}
+        <section id="why" className="nf-why-section">
+          <div className="nf-section-intro">
+            <p className="nf-kicker">Why NeuroFleetX</p>
+            <h2>Built for modern logistics teams and growing fleets.</h2>
+          </div>
+
+          <div className="nf-why-grid">
+            <div className="nf-why-card">
+              Real-time visibility across routes, drivers, and vehicles.
+            </div>
+            <div className="nf-why-card">
+              Faster decisions with clear operations data and alerts.
+            </div>
+            <div className="nf-why-card">
+              Reduce delivery costs while improving customer service.
+            </div>
+            <div className="nf-why-card">
+              Easy onboarding for dispatchers, drivers, and customers.
+            </div>
+          </div>
+        </section>
+
+        <section className="nf-cta-section">
+          <div className="nf-cta-card">
+            <div>
+              <p className="nf-kicker">Get started</p>
+              <h2>Move from planning to action with confidence.</h2>
+            </div>
+            <div className="nf-cta-actions">
+              <Link to="/register" className="nf-btn-primary nf-hero-btn">
+                Start free
+              </Link>
+              <Link to="/login" className="nf-btn-outline nf-hero-btn">
+                Login
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <section id="contact" className="nf-contact-section">
           <div className="nf-contact-card">
             <h2>Contact</h2>
             <p className="nf-contact-text">
-              This is an academic project prototype for demonstrating AI-based
-              urban fleet and traffic management using a Java full-stack
-              architecture with React frontend.
+              NeuroFleetX is a demo logistics platform built with React and Java. Explore intelligent fleet management through a polished interface built for supply chain professionals.
             </p>
+
             <div className="nf-contact-grid">
               <div>
-                <h3>Project Name</h3>
-                <p>NeuroFleetX – AI Powered Urban Fleet & Traffic Management</p>
+                <h3>App name</h3>
+                <p>NeuroFleetX</p>
+              </div>
+              <div>
+                <h3>Tagline</h3>
+                <p>Smart fleet operations for modern logistics.</p>
               </div>
               <div>
                 <h3>Get in touch</h3>
@@ -139,14 +177,8 @@ const Home = () => {
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="nf-site-footer">
-        <div className="nf-footer-left">
-          <span className="nf-footer-title">NeuroFleetX</span>
-          <span className="nf-footer-sub">
-            © {year} NeuroFleetX. All rights reserved.
-          </span>
-        </div>
+      <footer className="nf-site-footer nf-footer-centered">
+        <span>© {new Date().getFullYear()} NeuroFleetX. All rights reserved.</span>
       </footer>
     </div>
   );

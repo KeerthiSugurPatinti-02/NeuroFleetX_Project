@@ -1,55 +1,24 @@
 // src/services/services.js
-import { API_BASE_URL } from "../config";
-
-import { setUser } from '../utils/authUtils';
+import apiClient from './apiClient';
+import { setUser, clearAuth } from '../utils/authUtils';
 
 const REGISTERED_USER_KEY = 'nf_registered_user';
 export const authService = {
   async register({ gender, role, email, password }) {
-  const payload = { email, password, role, gender };
-
-  const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  let data;
-  const contentType = res.headers.get("content-type");
-
-  if (contentType && contentType.includes("application/json")) {
-    data = await res.json();   // Spring error object
-  } else {
-    data = await res.text();   // Plain text
-  }
-
-  if (!res.ok) {
-    // Spring JSON errors have: status, error, message?, path
-    throw new Error(
-      data.message || data.error || data || "Registration failed"
-    );
-  }
-
-  return data;  // success message or object
-},
+    const payload = { email, password, role, gender };
+    const { data } = await apiClient.post('/auth/register', payload);
+    return data;
+  },
 
   async login({ email, password }) {
-    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
+    const { data } = await apiClient.post('/auth/login', { email, password });
+    return data;
+  },
 
-    if (!res.ok) {
-      throw new Error("Invalid credentials");
-    }
-
-    const user = await res.json();
-    return user;
+  async logout() {
+    clearAuth();
+    localStorage.removeItem(REGISTERED_USER_KEY);
+    return { success: true };
   }
 };
 

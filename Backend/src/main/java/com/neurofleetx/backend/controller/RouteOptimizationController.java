@@ -1,15 +1,18 @@
 package com.neurofleetx.backend.controller;
 
-import com.neurofleetx.backend.service.RouteOptimizationService;
-import com.neurofleetx.backend.graph.Node;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.neurofleetx.backend.graph.Node;
+import com.neurofleetx.backend.service.RouteOptimizationService;
+
 @RestController
 @RequestMapping("/api/route")
-@CrossOrigin(origins = "http://localhost:3000")
 public class RouteOptimizationController {
 
     private final RouteOptimizationService service;

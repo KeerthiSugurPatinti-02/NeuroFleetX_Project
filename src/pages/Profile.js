@@ -1,94 +1,85 @@
 // src/pages/Profile.js
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { profileService } from "../services/services";
-import { getUser } from "../utils/authUtils";
-import MapView from "../components/MapView";
-import "../styles/auth.css";
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { profileService } from '../services/services';
+import { getUser } from '../utils/authUtils';
+import MapView from '../components/MapView';
+import '../styles/auth.css';
 
 const DASHBOARD_ROUTE = {
-  ADMIN: "/admin",
-  FLEET_MANAGER: "/fleet-manager",
-  DRIVER: "/driver",
-  CUSTOMER: "/customer",
+  ADMIN: '/admin',
+  FLEET_MANAGER: '/fleet-manager',
+  DRIVER: '/driver',
+  CUSTOMER: '/customer',
 };
 
 const Profile = () => {
   const navigate = useNavigate();
-  const user = getUser(); // logged-in user from token / localStorage
+  const user = getUser();
 
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
-
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    dob: "",
-    phone: "",
-    gender: "Female",
-    travelPreferences: "",
-    location: "",
-    role: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    dob: '',
+    phone: '',
+    gender: 'FEMALE',
+    travelPreferences: '',
+    location: '',
+    role: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
     latitude: null,
     longitude: null,
   });
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
 
-  const [msg, setMsg] = useState("");
-  const [err, setErr] = useState("");
-
-  // ================= LOAD PROFILE + FIX ROLE =================
   useEffect(() => {
-    const p = profileService.getProfile(); // profile stored locally
-    const loggedUser = getUser();          // real logged-in user
+    const profile = profileService.getProfile();
+    const loggedUser = getUser();
 
-    if (p) {
+    if (profile) {
       setForm((prev) => ({
         ...prev,
-        ...p,
-        // Always trust the logged-in role, not stored profile role
-        role: loggedUser?.role || p.role,
-        email: loggedUser?.email || p.email,
-        name: loggedUser?.name || p.name,
+        ...profile,
+        role: loggedUser?.role || profile.role,
+        email: loggedUser?.email || profile.email,
+        name: loggedUser?.name || profile.name,
       }));
     } else if (loggedUser) {
       setForm((prev) => ({
         ...prev,
-        name: loggedUser.name,
-        email: loggedUser.email,
-        role: loggedUser.role,
+        name: loggedUser.name || '',
+        email: loggedUser.email || '',
+        role: loggedUser.role || '',
       }));
     }
 
     setProfileLoaded(true);
   }, []);
 
-  // ================= LIVE LOCATION =================
   useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      console.warn("Geolocation is not available in this browser");
+    if (!('geolocation' in navigator)) {
       return;
     }
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-
         setForm((prev) => ({
           ...prev,
           latitude,
           longitude,
           location:
-            prev.location && prev.location.trim() !== ""
+            prev.location && prev.location.trim() !== ''
               ? prev.location
               : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
         }));
       },
-      (error) => {
-        console.error("Error getting live location:", error);
-      },
+      () => {},
       {
         enableHighAccuracy: true,
         maximumAge: 5000,
@@ -96,12 +87,9 @@ const Profile = () => {
       }
     );
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
+    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  // ================= HANDLERS =================
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -109,36 +97,33 @@ const Profile = () => {
 
   const goBackToDashboard = () => {
     const role = user?.role || form.role;
-    const target = DASHBOARD_ROUTE[role] || "/";
-    navigate(target);
+    navigate(DASHBOARD_ROUTE[role] || '/');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setMsg("");
-    setErr("");
+    setMsg('');
+    setErr('');
 
-    // Password validation
     if (
       showPasswordFields &&
       (form.currentPassword || form.newPassword || form.confirmPassword)
     ) {
       if (!form.currentPassword) {
-        setErr("Please enter your current password.");
+        setErr('Please enter your current password.');
         return;
       }
       if (!form.newPassword || form.newPassword.length < 6) {
-        setErr("New password must be at least 6 characters.");
+        setErr('New password must be at least 6 characters.');
         return;
       }
       if (form.newPassword !== form.confirmPassword) {
-        setErr("New password and confirm password do not match.");
+        setErr('New password and confirm password do not match.');
         return;
       }
     }
 
     try {
-      // Save profile
       profileService.updateProfile({
         name: form.name,
         dob: form.dob,
@@ -150,7 +135,6 @@ const Profile = () => {
         longitude: form.longitude,
       });
 
-      // Change password if requested
       if (showPasswordFields && form.newPassword) {
         profileService.changePassword({
           currentPassword: form.currentPassword,
@@ -158,13 +142,10 @@ const Profile = () => {
         });
       }
 
-      setMsg("Profile updated successfully.");
-
-      setTimeout(() => {
-        goBackToDashboard();
-      }, 700);
+      setMsg('Profile updated successfully.');
+      setTimeout(goBackToDashboard, 700);
     } catch (error) {
-      setErr(error.message || "Failed to update profile.");
+      setErr(error.message || 'Failed to update profile.');
     }
   };
 
@@ -172,7 +153,6 @@ const Profile = () => {
     goBackToDashboard();
   };
 
-  // ================= NO PROFILE CASE =================
   if (profileLoaded && !form.email) {
     return (
       <div className="nf-auth-page">
@@ -189,13 +169,12 @@ const Profile = () => {
     );
   }
 
-  // ================= UI =================
   return (
     <div className="nf-auth-page">
       <div className="nf-auth-card nf-profile-card">
         <h1 className="nf-auth-title">My Profile</h1>
         <p className="nf-auth-subtitle">
-          Manage your personal details, preferences and password.
+          Manage your personal details, preferences, and password.
         </p>
 
         {err && <div className="nf-alert nf-alert-error">{err}</div>}
@@ -212,6 +191,7 @@ const Profile = () => {
                 placeholder="Your full name"
               />
             </div>
+
             <div className="nf-form-group">
               <label>Email</label>
               <input name="email" value={form.email} readOnly />
@@ -244,9 +224,9 @@ const Profile = () => {
             <div className="nf-form-group">
               <label>Gender</label>
               <select name="gender" value={form.gender} onChange={handleChange}>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Other">Other</option>
+                <option value="FEMALE">Female</option>
+                <option value="MALE">Male</option>
+                <option value="OTHER">Other</option>
               </select>
             </div>
             <div className="nf-form-group">
@@ -266,7 +246,6 @@ const Profile = () => {
             />
           </div>
 
-          {/* Location + Map */}
           <div className="nf-form-group">
             <label>Location (live)</label>
             <input
@@ -279,12 +258,11 @@ const Profile = () => {
               Your browser may ask for permission to access location.
             </small>
 
-            <div style={{ marginTop: "10px" }}>
+            <div style={{ marginTop: '10px' }}>
               <MapView lat={form.latitude} lng={form.longitude} />
             </div>
           </div>
 
-          {/* SECURITY */}
           <div className="nf-profile-section">
             <div className="nf-profile-section-header">
               <h4 className="nf-section-title">Security</h4>
@@ -293,7 +271,7 @@ const Profile = () => {
                 className="nf-btn-outline nf-small-btn"
                 onClick={() => setShowPasswordFields((prev) => !prev)}
               >
-                {showPasswordFields ? "Hide Password Fields" : "Change Password"}
+                {showPasswordFields ? 'Hide Password Fields' : 'Change Password'}
               </button>
             </div>
 
